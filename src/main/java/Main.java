@@ -73,11 +73,10 @@ public class Main {
                     }
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Set<Integer> all = matrix.stream()
+        Set<Integer> vertexAll = matrix.stream()
                 .map(Map::entrySet)
                 .flatMap(Set::stream)
                 .filter(entry -> entry.getValue().size() > 1)
@@ -89,18 +88,18 @@ public class Main {
                 map.entrySet().removeIf(entry -> entry.getValue().size() < 2)
         );
         List<Set<Integer>> out = new ArrayList<>();
-        while (all.size() > 0) {
+        while (vertexAll.size() > 0) {
             Set<Integer> neighborhood;
             Set<Integer> connectivitySubset = new HashSet<>();
-            Integer vertex = all.stream().findFirst().orElseThrow(ArrayIndexOutOfBoundsException::new);
-            all.remove(vertex);
+            Integer vertex = vertexAll.stream().findFirst().orElseThrow(ArrayIndexOutOfBoundsException::new);
+            vertexAll.remove(vertex);
             if (getNeighborhood(vertex, mas, matrix).size() > 1) {
                 connectivitySubset.add(vertex);
                 Set<Integer> isolatedComponent = new HashSet<>();
                 while (connectivitySubset.size() > 0) {
                     vertex = connectivitySubset.stream().findFirst().orElseThrow(ArrayIndexOutOfBoundsException::new);
                     isolatedComponent.add(vertex);
-                    all.remove(vertex);
+                    vertexAll.remove(vertex);
                     neighborhood = getNeighborhood(vertex, mas, matrix);
                     neighborhood.removeAll(isolatedComponent);
                     connectivitySubset.remove(vertex);
@@ -109,19 +108,21 @@ public class Main {
                 out.add(isolatedComponent);
             }
         }
-        out.sort((o1, o2) -> Integer.compare(o2.size(), o1.size()));
-
+        List<Set<String>> outStr = out.stream()
+                .map(setI -> setI.stream().map(i -> String.join(";", mas.get(i))).collect(Collectors.toSet()))
+                .filter(setS -> setS.size() > 1)
+                .sorted((o1, o2) -> Integer.compare(o2.size(), o1.size()))
+                .collect(Collectors.toList());
         filePath = "out.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write("Количество групп: " + out.size());
+            writer.write("Количество групп: " + outStr.size());
             writer.newLine();
             int kl = 1;
-            for (Set<Integer> set : out) {
+            for (Set<String> set : outStr) {
                 writer.write("Группа " + kl);
                 writer.newLine();
-                for (Integer i : set) {
-                    String o = String.join(";", mas.get(i));
-                    writer.write(o);
+                for (String str : set) {
+                    writer.write(str);
                     writer.newLine();
                 }
                 kl++;
