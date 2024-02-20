@@ -40,6 +40,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
         String filePath = "";
         if (args.length > 0) {
             filePath = args[0];
@@ -128,6 +129,7 @@ public class Main {
                 kl++;
             }
             System.out.println("Запись завершена в файл out.txt");
+            System.out.println("Время выполнения:"+(System.currentTimeMillis()-start)+" мс");
         } catch (IOException e) {
             e.printStackTrace();
         }
