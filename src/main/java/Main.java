@@ -31,9 +31,11 @@ public class Main {
         }
         String[] ar = line.split(";");
         for (String s : ar) {
-            if (!pattern.matcher(s).matches()) {
-                System.out.println("wrong line: " + line);
-                return false;
+            if (!s.isEmpty()) {
+                if (!pattern.matcher(s).matches()) {
+                    System.out.println("wrong line: " + line);
+                    return false;
+                }
             }
         }
         return true;
@@ -54,15 +56,20 @@ public class Main {
         List<Map<String, List<Integer>>> matrix = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            int kl = 1;
             while ((line = reader.readLine()) != null) {
                 String[] ar = line.split(";");
                 if (validateString(line)) {
                     mas.add(ar);
+                    if (kl % 10000 == 0) {
+                        System.out.print("\r" + (kl));
+                    }
+                    kl++;
                     for (int i = 0; i < ar.length; i++) {
                         if (matrix.size() == i) {
                             matrix.add(new HashMap<>());
                         }
-                        if (!"\"\"".equals(ar[i])) {
+                        if (!"\"\"".equals(ar[i]) && !ar[i].isEmpty()) {
                             if (matrix.get(i).containsKey(ar[i])) {
                                 matrix.get(i).get(ar[i]).add(mas.size() - 1);
                             } else {
@@ -77,17 +84,21 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Set<Integer> vertexAll = matrix.stream()
+        Set<Integer> vertexAll = matrix.parallelStream()
                 .map(Map::entrySet)
                 .flatMap(Set::stream)
                 .filter(entry -> entry.getValue().size() > 1)
                 .map(Map.Entry::getValue)
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
-
+        System.out.println();
+        System.out.println("matrix "+ (System.currentTimeMillis() - start) + " мс");
+        start = System.currentTimeMillis();
         matrix.forEach(map ->
                 map.entrySet().removeIf(entry -> entry.getValue().size() < 2)
         );
+        System.out.println("matrix2 "+ (System.currentTimeMillis() - start) + " мс");
+        start = System.currentTimeMillis();
         List<Set<Integer>> out = new ArrayList<>();
         while (vertexAll.size() > 0) {
             Set<Integer> neighborhood;
@@ -98,6 +109,10 @@ public class Main {
                 connectivitySubset.add(vertex);
                 Set<Integer> isolatedComponent = new HashSet<>();
                 while (connectivitySubset.size() > 0) {
+                    if (vertexAll.size() % 20000 == 0) {
+                        System.out.print("\r" + "                    ");
+                        System.out.print("\r" + (vertexAll.size()));
+                    }
                     vertex = connectivitySubset.stream().findFirst().orElseThrow(ArrayIndexOutOfBoundsException::new);
                     isolatedComponent.add(vertex);
                     vertexAll.remove(vertex);
@@ -114,12 +129,15 @@ public class Main {
                 .filter(setS -> setS.size() > 1)
                 .sorted((o1, o2) -> Integer.compare(o2.size(), o1.size()))
                 .collect(Collectors.toList());
+        System.out.println();
+        System.out.println("out");
         filePath = "out.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Количество групп: " + outStr.size());
             writer.newLine();
             int kl = 1;
             for (Set<String> set : outStr) {
+                System.out.print("\r группа" + (kl));
                 writer.write("Группа " + kl);
                 writer.newLine();
                 for (String str : set) {
@@ -128,8 +146,9 @@ public class Main {
                 }
                 kl++;
             }
+            System.out.println();
             System.out.println("Запись завершена в файл out.txt");
-            System.out.println("Время выполнения:"+(System.currentTimeMillis()-start)+" мс");
+            System.out.println("Время выполнения:" + (System.currentTimeMillis() - start) + " мс");
         } catch (IOException e) {
             e.printStackTrace();
         }
