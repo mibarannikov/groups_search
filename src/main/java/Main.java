@@ -32,8 +32,7 @@ public class Main {
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
-        long start1 = System.currentTimeMillis();
-        String filePath = "C:\\Users\\mibar\\IdeaProjects\\new\\ing.txt";
+        String filePath = "";
         if (args.length > 0) {
             filePath = args[0];
         }
@@ -76,26 +75,26 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        List< Set<String>> outt = matrix.stream()
+        List<Set<String>> out = matrix.stream()
                 .map(Map::entrySet)
                 .flatMap(Set::stream)
                 .map(Map.Entry::getValue)
                 .filter(v -> v.getList().size() > 1)
                 .collect(Collectors.groupingBy(Value::getGroupNumber, Collectors.toList()))
                 .values()
-                .stream()
+                .parallelStream()
                 .map(values -> values.stream().map(Value::getList).flatMap(List::stream).collect(Collectors.toList()))
                 .map(l -> l.stream().map(mas::get).collect(Collectors.toSet()))
-                .filter(l -> l.size()>1)
-                .sorted((o1,o2) -> Integer.compare(o2.size(),o1.size()))
+                .filter(l -> l.size() > 1)
+                .sorted((o1, o2) -> Integer.compare(o2.size(), o1.size()))
                 .collect(Collectors.toList());
-        System.out.println("Количество групп " + outt.size());
+        System.out.println("Количество групп " + out.size());
         filePath = "out.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write("Количество групп: " + outt.size());
+            writer.write("Количество групп: " + out.size());
             writer.newLine();
             int kl = 1;
-            for (Set<String> set : outt) {
+            for (Set<String> set : out) {
                 writer.write("Группа " + kl);
                 writer.newLine();
                 for (String str : set) {
@@ -106,7 +105,7 @@ public class Main {
             }
             System.out.println();
             System.out.println("Запись завершена в файл out.txt");
-            System.out.println("Время выполнения:" + (System.currentTimeMillis() - start1) + " мс");
+            System.out.println("Время выполнения:" + (System.currentTimeMillis() - start) + " мс");
         } catch (IOException e) {
             e.printStackTrace();
         }
