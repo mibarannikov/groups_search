@@ -3,8 +3,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -54,6 +57,34 @@ public class Main {
         }
         List<String[]> mas = new ArrayList<>();
         List<Map<String, List<Integer>>> matrix = new ArrayList<>();
+        //List<Map<String, List<Integer>>> matrix = new CopyOnWriteArrayList<>();
+//        try (Stream<String> lines = Files.lines(path)) {
+//            lines.parallel()
+//                    .filter(line -> validateString(line))
+//                    .forEach(line -> {
+//                        String[] ar = line.split(";");
+//                        mas.add(ar);
+//                        for (int i = 0; i < ar.length; i++) {
+//                            if (matrix.size() == i) {
+//                                matrix.add(new ConcurrentHashMap<>());
+//                            }
+//                            if (!"\"\"".equals(ar[i]) && !ar[i].isEmpty()) {
+//                                if (matrix.get(i).containsKey(ar[i])) {
+//                                    matrix.get(i).get(ar[i]).add(mas.size() - 1);
+//                                } else {
+//                                    List<Integer> newList = Collections.synchronizedList(new ArrayList<>());
+//                                    newList.add(mas.size() - 1);
+//                                    matrix.get(i).put(ar[i], newList);
+//                                }
+//                            }
+//                        }
+//                    });
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("finish parallels"+ (System.currentTimeMillis() - start) + " мс");
+//        start = System.currentTimeMillis();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             int kl = 1;
@@ -94,7 +125,7 @@ public class Main {
         System.out.println();
         System.out.println("matrix "+ (System.currentTimeMillis() - start) + " мс");
         start = System.currentTimeMillis();
-        matrix.forEach(map ->
+        matrix.parallelStream().forEach(map ->
                 map.entrySet().removeIf(entry -> entry.getValue().size() < 2)
         );
         System.out.println("matrix2 "+ (System.currentTimeMillis() - start) + " мс");
