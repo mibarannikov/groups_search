@@ -38,7 +38,6 @@ public class Main {
             System.out.println("Приложение не имеет прав на чтение файла.");
             return;
         }
-        List<String> mas = new ArrayList<>();
         List<Map<String, Value>> matrix = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -46,7 +45,6 @@ public class Main {
             while ((line = reader.readLine()) != null) {
                 if (validateString(line)) {
                     String[] ar = line.split(";");
-                    //mas.add(line);
                     List<Value> listValue = new ArrayList<>();
                     for (int i = 0; i < ar.length; i++) {
                         if (matrix.size() == i) {
@@ -75,9 +73,6 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Set<Integer> setIndexes = new HashSet<>();
-        //
         List<Set<String>> out = matrix.stream()
                 .map(Map::entrySet)
                 .flatMap(Set::stream)
@@ -91,7 +86,6 @@ public class Main {
                 .sorted((o1, o2) -> Integer.compare(o2.size(), o1.size()))
                 .collect(Collectors.toList());
         System.out.println("Количество групп " + out.size());
-
         filePath = "out.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Количество групп: " + out.size());
@@ -106,7 +100,6 @@ public class Main {
                 }
                 kl++;
             }
-            System.out.println();
             System.out.println("Запись завершена в файл out.txt");
             System.out.println("Время выполнения:" + (System.currentTimeMillis() - start) + " мс");
         } catch (IOException e) {
