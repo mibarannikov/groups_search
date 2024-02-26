@@ -1,23 +1,23 @@
 import java.util.List;
 
 public class Value {
-    private List<Integer> list;
+    private List<String> list;
     private Integer groupNumber;
 
     public Value() {
     }
 
-    public Value(List<Integer> list, Integer groupNumber) {
+    public Value(List<String> list, Integer groupNumber) {
 
         this.list = list;
         this.groupNumber = groupNumber;
     }
 
-    public List<Integer> getList() {
+    public List<String> getList() {
         return list;
     }
 
-    public void setList(List<Integer> list) {
+    public void setList(List<String> list) {
         this.list = list;
     }
 

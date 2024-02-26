@@ -1,13 +1,10 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
 
@@ -43,38 +40,44 @@ public class Main {
         }
         List<String> mas = new ArrayList<>();
         List<Map<String, Value>> matrix = new ArrayList<>();
-        try (Stream<String> lines = Files.lines(path)) {
-            lines.filter(Main::validateString)
-                    .forEach(line -> {
-                        String[] ar = line.split(";");
-                        mas.add(line);
-                        List<Value> listValue = new ArrayList<>();
-                        for (int i = 0; i < ar.length; i++) {
-                            if (matrix.size() == i) {
-                                matrix.add(new HashMap<>());
-                            }
-                            if (!"\"\"".equals(ar[i]) && !ar[i].isEmpty()) {
-                                Value value;
-                                if (matrix.get(i).containsKey(ar[i])) {
-                                    value = matrix.get(i).get(ar[i]);
-                                    value.getList().add(mas.size() - 1);
-
-                                } else {
-                                    List<Integer> newList = new ArrayList<>();
-                                    newList.add(mas.size() - 1);
-                                    value = new Value(newList, mas.size());
-                                    matrix.get(i).put(ar[i], value);
-                                }
-                                listValue.add(value);
-                            }
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            int k = 1;
+            while ((line = reader.readLine()) != null) {
+                if (validateString(line)) {
+                    String[] ar = line.split(";");
+                    //mas.add(line);
+                    List<Value> listValue = new ArrayList<>();
+                    for (int i = 0; i < ar.length; i++) {
+                        if (matrix.size() == i) {
+                            matrix.add(new HashMap<>());
                         }
-                        Integer min = listValue.stream().mapToInt(Value::getGroupNumber).min().orElse(0);//todo throw
-                        listValue.forEach(v -> v.setGroupNumber(min));
-                    });
+                        if (!"\"\"".equals(ar[i]) && !ar[i].isEmpty()) {
+                            Value value;
+                            if (matrix.get(i).containsKey(ar[i])) {
+                                value = matrix.get(i).get(ar[i]);
+                                value.getList().add(line);
 
+                            } else {
+                                List<String> newList = new ArrayList<>();
+                                newList.add(line);
+                                value = new Value(newList, k);
+                                matrix.get(i).put(ar[i], value);
+                            }
+                            listValue.add(value);
+                        }
+                    }
+                    Integer min = listValue.stream().mapToInt(Value::getGroupNumber).min().orElse(0);//todo throw
+                    listValue.forEach(v -> v.setGroupNumber(min));
+                    k++;
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Set<Integer> setIndexes = new HashSet<>();
+        //
         List<Set<String>> out = matrix.stream()
                 .map(Map::entrySet)
                 .flatMap(Set::stream)
@@ -83,12 +86,12 @@ public class Main {
                 .collect(Collectors.groupingBy(Value::getGroupNumber, Collectors.toList()))
                 .values()
                 .parallelStream()
-                .map(values -> values.stream().map(Value::getList).flatMap(List::stream).collect(Collectors.toList()))
-                .map(l -> l.stream().map(mas::get).collect(Collectors.toSet()))
+                .map(values -> values.stream().map(Value::getList).flatMap(List::stream).collect(Collectors.toSet()))
                 .filter(l -> l.size() > 1)
                 .sorted((o1, o2) -> Integer.compare(o2.size(), o1.size()))
                 .collect(Collectors.toList());
         System.out.println("Количество групп " + out.size());
+
         filePath = "out.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write("Количество групп: " + out.size());
