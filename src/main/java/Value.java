@@ -1,23 +1,28 @@
-import java.util.List;
-
 public class Value {
-    private List<String> list;
-    private Integer groupNumber;
+    private String[] list;
+    private int groupNumber;
 
     public Value() {
     }
 
-    public Value(List<String> list, Integer groupNumber) {
+    public Value(String[] list, int groupNumber) {
 
         this.list = list;
         this.groupNumber = groupNumber;
     }
 
-    public List<String> getList() {
+    public String[] getList() {
         return list;
     }
 
-    public void setList(List<String> list) {
+    public void add(String s) {
+        String[] newArray = new String[list.length + 1];
+        System.arraycopy(list, 0, newArray, 0, list.length);
+        newArray[newArray.length - 1] = s;
+        list = newArray;
+    }
+
+    public void setList(String[] list) {
         this.list = list;
     }
 
@@ -25,7 +30,7 @@ public class Value {
         return groupNumber;
     }
 
-    public void setGroupNumber(Integer groupNumber) {
+    public void setGroupNumber(int groupNumber) {
         this.groupNumber = groupNumber;
     }
 }
